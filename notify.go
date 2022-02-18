@@ -30,7 +30,7 @@ type JdNotify struct {
 
 var cc *cron.Cron
 
-var jdNotify = core.NewBucket("jdNotify")
+var jdNotify = core.MakeBucket("jdNotify")
 
 func assetPush(pt_pin string) {
 	jn := &JdNotify{
@@ -64,7 +64,7 @@ func assetPush(pt_pin string) {
 			"qq", "tg", "wx",
 		} {
 			var fs []func()
-			core.Bucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
+			core.MakeBucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
 				if string(k) == pt_pin && pt_pin != "" {
 					if push, ok := core.Pushs[tp]; ok {
 						fs = append(fs, func() {
@@ -144,7 +144,7 @@ func initNotify() {
 	core.AddCommand("", []core.Function{
 		{
 			Rules: []string{`raw ^任务通知$`},
-			Cron:  jd_cookie.Get("task_Notify", "2 7,13,19 * * *"),
+			Cron:  jd_cookie.GetString("task_Notify", "2 7,13,19 * * *"),
 			Admin: true,
 			Handle: func(_ core.Sender) interface{} {
 				jdNotify.Foreach(func(_, v []byte) error {
@@ -195,7 +195,7 @@ func initNotify() {
 		{
 			Rules: []string{`raw ^账号管理$`},
 			Handle: func(s core.Sender) interface{} {
-				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
+				if groupCode := jd_cookie.GetString("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
 					s.Continue()
 					return nil
 				}

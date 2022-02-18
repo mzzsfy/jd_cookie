@@ -15,7 +15,7 @@ import (
 	"github.com/cdle/sillyGirl/develop/qinglong"
 )
 
-var jdWSCK = core.NewBucket("jdWSCK")
+var jdWSCK = core.MakeBucket("jdWSCK")
 
 var ua2 = `http/3.12.1;jdmall;android;version/10.1.2;build/89743;screen/1440x3007;os/11;network/wifi;`
 
@@ -33,7 +33,7 @@ func initCheck() {
 	core.AddCommand("jd", []core.Function{
 		{
 			Rules: []string{`raw ^更新狗东账号`},
-			Cron:  jdWSCK.Get("update", "55 * * * *"),
+			Cron:  jdWSCK.GetString("update", "55 * * * *"),
 			Admin: true,
 			Handle: func(s core.Sender) interface{} {
 				if s.GetImType() == "fake" && !jd_cookie.GetBool("enable_auto_update", true) {
@@ -250,11 +250,11 @@ func Notify(pt_pin string, content string) {
 	}
 	qqGroup := jd_cookie.GetInt("qqGroup")
 	wxGroup := jd_cookie.GetInt("wxGroup")
-	mode := jd_cookie.Get("notify_mode", "private")
+	mode := jd_cookie.GetString("notify_mode", "private")
 	for _, tp := range []string{
 		"qq", "tg", "wx",
 	} {
-		core.Bucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
+		core.MakeBucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
 			if string(k) == pt_pin && pt_pin != "" {
 				if mode != "group" {
 					if push, ok := core.Pushs[tp]; ok {

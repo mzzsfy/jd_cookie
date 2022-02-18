@@ -148,7 +148,7 @@ func initAsset() {
 	//待做：增加惊喜工厂
 	core.AddCommand("jd", []core.Function{
 		{
-			Rules: []string{`asset ?`, `raw ^` + jd_cookie.Get("asset_query_alias", "查询") + ` (\S+)$`},
+			Rules: []string{`asset ?`, `raw ^` + jd_cookie.GetString("asset_query_alias", "查询") + ` (\S+)$`},
 			Admin: true,
 			Handle: func(s core.Sender) interface{} {
 				if s.GetImType() == "wxsv" && !s.IsAdmin() && jd_cookie.GetBool("ban_wxsv") {
@@ -188,7 +188,7 @@ func initAsset() {
 				if len(cks) == 0 {
 					return "没有匹配的京东账号。"
 				}
-				ke := core.Bucket("wxmp").GetBool("isKe?", false)
+				ke := core.MakeBucket("wxmp").GetBool("isKe?", false)
 				if s.GetImType() == "wxmp" && !ke {
 					if len(cks) <= 2 {
 						cs := []chan string{}
@@ -223,7 +223,7 @@ func initAsset() {
 		},
 		{
 			Rules: []string{`raw ^资产推送$`},
-			Cron:  jd_cookie.Get("asset_push"),
+			Cron:  jd_cookie.GetString("asset_push"),
 			Admin: true,
 			Handle: func(_ core.Sender) interface{} {
 				qqGroup := jd_cookie.GetInt("qqGroup")
@@ -231,7 +231,7 @@ func initAsset() {
 					"qq", "tg", "wx",
 				} {
 					var fs []func()
-					core.Bucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
+					core.MakeBucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
 						if string(k) != "" {
 							jn := &JdNotify{
 								ID: string(k),
@@ -261,13 +261,13 @@ func initAsset() {
 		},
 		{
 			Rules: []string{`myCookie`},
-			Cron:  jd_cookie.Get("asset_push"),
+			Cron:  jd_cookie.GetString("asset_push"),
 			Handle: func(s core.Sender) interface{} {
 				cookies := []string{}
 				tp := s.GetImType()
 				uid := s.GetUserID()
 
-				core.Bucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
+				core.MakeBucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
 					if string(k) != "" && string(v) == uid {
 						jn := &JdNotify{
 							ID: string(k),
@@ -299,7 +299,7 @@ func initAsset() {
 			},
 		},
 		{
-			Rules: []string{`^` + jd_cookie.Get("asset_query_alias", "查询") + `$`},
+			Rules: []string{`^` + jd_cookie.GetString("asset_query_alias", "查询") + `$`},
 			Handle: func(s core.Sender) interface{} {
 				if s.GetImType() == "wxsv" && !s.IsAdmin() && jd_cookie.GetBool("ban_wxsv") {
 					return "不支持此功能。"
@@ -321,15 +321,15 @@ func initAsset() {
 										left = 1
 									}
 									return fmt.Sprintf("%d秒后再查询。", left)
-								}, "^"+jd_cookie.Get("asset_query_alias", "查询")+"$", time.Second)
+								}, "^"+jd_cookie.GetString("asset_query_alias", "查询")+"$", time.Second)
 							}
 						}
 					}()
 				}
-				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
+				if groupCode := jd_cookie.GetString("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
 					return nil
 				}
-				if query_time := jd_cookie.Get("query_time"); query_time != "" {
+				if query_time := jd_cookie.GetString("query_time"); query_time != "" {
 					res := regexp.MustCompile(`\d{2}:\d{2}`).FindAllString(query_time, -1)
 
 					if len(res) == 2 {
@@ -484,7 +484,7 @@ func initAsset() {
 				for _, tp := range []string{
 					"qq", "tg", "wx", "wxmp",
 				} {
-					core.Bucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
+					core.MakeBucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
 						pt_pin := string(k)
 						account := string(v)
 						if pt_pin == s.Get() && pt_pin != "" {
@@ -607,7 +607,7 @@ func LimitJdCookie(cks []JdCookie, a string) []JdCookie {
 		for _, tp := range []string{
 			"qq", "tg", "wx", "wxmp",
 		} {
-			core.Bucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
+			core.MakeBucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
 
 				pt_pin := string(k)
 				account := string(v)

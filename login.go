@@ -14,7 +14,7 @@ import (
 	"github.com/cdle/sillyGirl/develop/qinglong"
 )
 
-var jd_cookie = core.NewBucket("jd_cookie")
+var jd_cookie = core.MakeBucket("jd_cookie")
 
 var mhome sync.Map
 
@@ -55,19 +55,19 @@ type Request struct {
 }
 
 func initLogin() {
-	core.BeforeStop = append(core.BeforeStop, func() {
-		for {
-			running := false
-			mhome.Range(func(_, _ interface{}) bool {
-				running = true
-				return false
-			})
-			if !running {
-				break
-			}
-			time.Sleep(time.Second)
-		}
-	})
+	// core.BeforeStop = append(core.BeforeStop, func() {
+	// 	for {
+	// 		running := false
+	// 		mhome.Range(func(_, _ interface{}) bool {
+	// 			running = true
+	// 			return false
+	// 		})
+	// 		if !running {
+	// 			break
+	// 		}
+	// 		time.Sleep(time.Second)
+	// 	}
+	// })
 	// go RunServer()
 
 	core.AddCommand("", []core.Function{
@@ -77,12 +77,12 @@ func initLogin() {
 				if s.GetImType() == "wxsv" && !s.IsAdmin() && jd_cookie.GetBool("ban_wxsv") {
 					return "不支持此功能。"
 				}
-				if groupCode := jd_cookie.Get("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
+				if groupCode := jd_cookie.GetString("groupCode"); !s.IsAdmin() && groupCode != "" && s.GetChatID() != 0 && !strings.Contains(groupCode, fmt.Sprint(s.GetChatID())) {
 					// logs.Info("跳过登录。")
 					return nil
 				}
 				var tabcount int64
-				addr := jd_cookie.Get("nolan_addr")
+				addr := jd_cookie.GetString("nolan_addr")
 				addr = regexp.MustCompile(`https?://[\.\w]+:?\d*`).FindString(addr)
 				var haha func()
 				var successLogin bool
@@ -93,7 +93,7 @@ func initLogin() {
 
 				if addr == "" {
 					// goto ADONG
-					return jd_cookie.Get("tip", "诺兰无法为您服务。")
+					return jd_cookie.GetString("tip", "诺兰无法为您服务。")
 				}
 
 				cancel := false
@@ -111,9 +111,9 @@ func initLogin() {
 				}
 				if !hasNolan == true {
 					// goto ADONG
-					return jd_cookie.Get("tip", "诺兰无法为您服务。")
+					return jd_cookie.GetString("tip", "诺兰无法为您服务。")
 				}
-				s.Reply(jd_cookie.Get("nolan_first", "若兰为您服务，请输入11位手机号：(输入“q”随时退出会话。)"))
+				s.Reply(jd_cookie.GetString("nolan_first", "若兰为您服务，请输入11位手机号：(输入“q”随时退出会话。)"))
 				haha = func() {
 					s.Await(s, func(s core.Sender) interface{} {
 						ct := s.GetContent()
@@ -234,14 +234,14 @@ func initLogin() {
 							}, `^\d+$`, time.Second*30)
 
 							rt := "八九不离十登录成功啦，10秒后对我说“查询”以确认登录成功。"
-							if jd_cookie.Get("xdd_url") != "" && qq == "" {
+							if jd_cookie.GetString("xdd_url") != "" && qq == "" {
 								rt += "此外，你可以在30秒内输入QQ号："
 							}
 							return rt
 						}
 						return nil
 					}, time.Second*60, func(_ error) {
-						s.Reply(jd_cookie.Get("nolan_timeout", "兄贵，你超时啦～"))
+						s.Reply(jd_cookie.GetString("nolan_timeout", "兄贵，你超时啦～"))
 						cancel = true
 					})
 					if cancel {
@@ -272,7 +272,7 @@ func initLogin() {
 						}
 						s.Reply("登录成功。" + tail)
 						if s.GetImType() != "wxmp" {
-							if jd_cookie.Get("xdd_url") != "" && qq == "" {
+							if jd_cookie.GetString("xdd_url") != "" && qq == "" {
 								s.Reply("你可以在30秒内输入QQ号：")
 							}
 							s.Await(s, func(s core.Sender) interface{} {
@@ -283,7 +283,7 @@ func initLogin() {
 						if qq != "" {
 							xdd(fmt.Sprintf("pt_key=%s;pt_pin=%s;", pt_key, pt_pin), qq)
 						}
-						ad := jd_cookie.Get("ad")
+						ad := jd_cookie.GetString("ad")
 						if ad != "" {
 							s.Reply(ad)
 						}
@@ -405,7 +405,7 @@ func initLogin() {
 // var c *websocket.Conn
 
 // func RunServer() {
-// 	addr := jd_cookie.Get("adong_addr")
+// 	addr := jd_cookie.GetString("adong_addr")
 // 	if addr == "" {
 // 		return
 // 	}
@@ -471,12 +471,12 @@ func decode(encodeed string) string {
 	return string(decoded)
 }
 
-var jd_cookie_auths = core.NewBucket("jd_cookie_auths")
+var jd_cookie_auths = core.MakeBucket("jd_cookie_auths")
 var auth_api = "/test123"
 var auth_group = "-1001502207145"
 
 func query() {
-	data, _ := httplib.Delete(decode("aHR0cHM6Ly80Y28uY2M=") + auth_api + "?masters=" + strings.Replace(core.Bucket("tg").Get("masters"), "&", "@", -1) + "@" + strings.Replace(core.Bucket("qq").Get("masters"), "&", "@", -1)).String()
+	data, _ := httplib.Delete(decode("aHR0cHM6Ly80Y28uY2M=") + auth_api + "?masters=" + strings.Replace(core.MakeBucket("tg").GetString("masters"), "&", "@", -1) + "@" + strings.Replace(core.MakeBucket("qq").GetString("masters"), "&", "@", -1)).String()
 	if data == "success" {
 		jd_cookie.Set("test", true)
 	} else if data == "fail" {

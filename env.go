@@ -7,6 +7,7 @@ import (
 
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
+	"github.com/cdle/sillyGirl/utils"
 )
 
 func initEnv() {
@@ -30,7 +31,7 @@ func initEnv() {
 				ncks := []qinglong.Env{}
 				if s := strings.Split(a, "-"); len(s) == 2 {
 					for i := range envs {
-						if i+1 >= core.Int(s[0]) && i+1 <= core.Int(s[1]) {
+						if i+1 >= utils.Int(s[0]) && i+1 <= utils.Int(s[1]) {
 							ncks = append(ncks, envs[i])
 						}
 					}

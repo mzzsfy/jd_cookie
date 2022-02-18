@@ -9,12 +9,12 @@ import (
 	"github.com/cdle/sillyGirl/develop/qinglong"
 )
 
-var pinQQ = core.NewBucket("pinQQ")
-var pinTG = core.NewBucket("pinTG")
-var pinWXMP = core.NewBucket("pinWXMP")
-var pinWX = core.NewBucket("pinWX")
+var pinQQ = core.MakeBucket("pinQQ")
+var pinTG = core.MakeBucket("pinTG")
+var pinWXMP = core.MakeBucket("pinWXMP")
+var pinWX = core.MakeBucket("pinWX")
 var pin = func(class string) core.Bucket {
-	return core.Bucket("pin" + strings.ToUpper(class))
+	return core.MakeBucket("pin" + strings.ToUpper(class))
 }
 
 func initSubmit() {
@@ -137,7 +137,7 @@ func initSubmit() {
 				for _, tp := range []string{
 					"qq", "tg", "wx",
 				} {
-					core.Bucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
+					core.MakeBucket("pin" + strings.ToUpper(tp)).Foreach(func(k, v []byte) error {
 						pt_pin := string(k)
 						if pt_pin == user_pin || user_pin == "all" {
 							if push, ok := core.Pushs[tp]; ok {
@@ -209,7 +209,7 @@ func initSubmit() {
 					}
 
 					value := fmt.Sprintf("pt_key=%s;pt_pin=%s;", ck.PtKey, ck.PtPin)
-					if jd_cookie.Get("xdd_url") != "" && !fake {
+					if jd_cookie.GetString("xdd_url") != "" && !fake {
 						if qq == "" {
 							s.Reply("请在30秒内输入QQ号：")
 							s.Await(s, func(s core.Sender) interface{} {
@@ -221,7 +221,7 @@ func initSubmit() {
 					}
 
 					qls := []*qinglong.QingLong{}
-					if strings.Contains(jd_cookie.Get("bus"), ck.PtPin) {
+					if strings.Contains(jd_cookie.GetString("bus"), ck.PtPin) {
 						qls = qinglong.GetQLS()
 					} else {
 						jn := &JdNotify{
@@ -318,7 +318,7 @@ func initSubmit() {
 					ck.Available()
 
 					qls := []*qinglong.QingLong{}
-					if strings.Contains(jd_cookie.Get("bus"), ck.PtPin) {
+					if strings.Contains(jd_cookie.GetString("bus"), ck.PtPin) {
 						qls = qinglong.GetQLS()
 					} else {
 						jn := &JdNotify{

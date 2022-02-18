@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	if !core.Bucket("qinglong").GetBool("enable_qinglong", true) {
+	if !core.MakeBucket("qinglong").GetBool("enable_qinglong", true) {
 		return
 	}
 	data, _ := os.ReadFile("dev.go")
@@ -45,7 +45,7 @@ func init() {
 var Transport *http.Transport
 
 func buildHttpTransportWithProxy() {
-	addr := jd_cookie.Get("http_proxy")
+	addr := jd_cookie.GetString("http_proxy")
 	if strings.Contains(addr, "http://") {
 		if addr != "" {
 			u, err := url.Parse(addr)
