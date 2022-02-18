@@ -12,6 +12,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
+	"github.com/cdle/sillyGirl/utils"
 )
 
 var jd_cookie = core.MakeBucket("jd_cookie")
@@ -55,19 +56,19 @@ type Request struct {
 }
 
 func initLogin() {
-	// core.BeforeStop = append(core.BeforeStop, func() {
-	// 	for {
-	// 		running := false
-	// 		mhome.Range(func(_, _ interface{}) bool {
-	// 			running = true
-	// 			return false
-	// 		})
-	// 		if !running {
-	// 			break
-	// 		}
-	// 		time.Sleep(time.Second)
-	// 	}
-	// })
+	utils.Runnings = append(utils.Runnings, func() {
+		for {
+			running := false
+			mhome.Range(func(_, _ interface{}) bool {
+				running = true
+				return false
+			})
+			if !running {
+				break
+			}
+			time.Sleep(time.Second)
+		}
+	})
 	// go RunServer()
 
 	core.AddCommand("", []core.Function{
