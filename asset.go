@@ -14,6 +14,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
+	"github.com/cdle/sillyGirl/utils"
 	"github.com/gin-gonic/gin"
 )
 
@@ -478,7 +479,7 @@ func initAsset() {
 			Handle: func(s core.Sender) interface{} {
 				rt := ""
 				pare := s.Get()
-				if r := core.FetchCookieValue("pt_pin", pare); r != "" {
+				if r := utils.FetchCookieValue("pt_pin", pare); r != "" {
 					pare = r
 				}
 				for _, tp := range []string{
@@ -887,7 +888,7 @@ func initFarm(cookie string, state chan string) {
 	}
 	data, _ := req.Bytes()
 	json.Unmarshal(data, &a)
-	pt_pin := core.FetchCookieValue("pt_pin", cookie)
+	pt_pin := utils.FetchCookieValue("pt_pin", cookie)
 	rt := a.FarmUserPro.Name
 	not := ""
 	if rt == "" {
@@ -994,7 +995,7 @@ func initPetTown(cookie string, state chan string) {
 	data, _ := req.Bytes()
 	json.Unmarshal(data, &a)
 	rt := ""
-	pt_pin := core.FetchCookieValue("pt_pin", cookie)
+	pt_pin := utils.FetchCookieValue("pt_pin", cookie)
 	not := ""
 	if a.Code == "0" && a.ResultCode == "0" && a.Message == "success" {
 		if a.Result.UserStatus == 0 {
@@ -1883,7 +1884,7 @@ func dream(cookie string, state chan string) {
 		state <- desc
 	}
 	if not {
-		a叉哦叉哦(core.FetchCookieValue("pt_pin", cookie), "京喜工厂", desc)
+		a叉哦叉哦(utils.FetchCookieValue("pt_pin", cookie), "京喜工厂", desc)
 	}
 }
 

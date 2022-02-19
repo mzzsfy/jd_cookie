@@ -12,6 +12,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
+	"github.com/cdle/sillyGirl/utils"
 	cron "github.com/robfig/cron/v3"
 )
 
@@ -115,8 +116,8 @@ func initNotify() {
 						continue
 					}
 					as++
-					pt_pin := core.FetchCookieValue(env.Value, "pt_pin")
-					pt_key := core.FetchCookieValue(env.Value, "pt_key")
+					pt_pin := utils.FetchCookieValue(env.Value, "pt_pin")
+					pt_key := utils.FetchCookieValue(env.Value, "pt_key")
 					if pt_pin != "" && pt_key != "" {
 						jn := &JdNotify{
 							ID: pt_pin,

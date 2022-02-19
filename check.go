@@ -13,6 +13,7 @@ import (
 	"github.com/buger/jsonparser"
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
+	"github.com/cdle/sillyGirl/utils"
 )
 
 var jdWSCK = core.MakeBucket("jdWSCK")
@@ -48,17 +49,17 @@ func initCheck() {
 				envs, _ := qinglong.GetEnvs(qls[0], "")
 				for _, env := range envs {
 					if env.Name == "JD_COOKIE" {
-						cks[core.FetchCookieValue(env.Value, "pt_pin")] = env
+						cks[utils.FetchCookieValue(env.Value, "pt_pin")] = env
 					}
 					if env.Name == "JD_WSCK" && env.Status == 0 {
-						wscks[core.FetchCookieValue(env.Value, "pin")] = env
+						wscks[utils.FetchCookieValue(env.Value, "pin")] = env
 					}
 				}
 				for pin, env := range cks {
 					if env.Status != 0 {
 						continue
 					}
-					pt_key := core.FetchCookieValue(env.Value, "pt_key")
+					pt_key := utils.FetchCookieValue(env.Value, "pt_key")
 					ck := &JdCookie{
 						PtPin: pin,
 						PtKey: pt_key,
@@ -240,7 +241,7 @@ func appjmp(tokenKey string) (string, error) {
 		return "", err
 	}
 	cookies := strings.Join(rsp.Header.Values("Set-Cookie"), " ")
-	pt_key := core.FetchCookieValue(cookies, "pt_key")
+	pt_key := utils.FetchCookieValue(cookies, "pt_key")
 	return pt_key, nil
 }
 

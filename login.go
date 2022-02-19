@@ -254,8 +254,8 @@ func initLogin() {
 					req.SetTimeout(time.Second*60, time.Second*60)
 					message, _ = jsonparser.GetString(data, "message")
 					if strings.Contains(string(data), "pt_pin=") {
-						pt_pin := core.FetchCookieValue(string(data), "pt_pin")
-						pt_key := core.FetchCookieValue(string(data), "pt_key")
+						pt_pin := utils.FetchCookieValue(string(data), "pt_pin")
+						pt_key := utils.FetchCookieValue(string(data), "pt_key")
 						successLogin = true
 						jn := &JdNotify{
 							ID:    pt_pin,

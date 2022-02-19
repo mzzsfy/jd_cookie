@@ -7,6 +7,7 @@ import (
 	"github.com/beego/beego/v2/core/logs"
 	"github.com/cdle/sillyGirl/core"
 	"github.com/cdle/sillyGirl/develop/qinglong"
+	"github.com/cdle/sillyGirl/utils"
 )
 
 var dzs = "	——来自大芝士"
@@ -37,7 +38,7 @@ func initRongQi() {
 						nn := []qinglong.Env{}
 						for _, env := range envs {
 							if env.Status == 0 {
-								env.PtPin = core.FetchCookieValue(env.Value, "pt_pin")
+								env.PtPin = utils.FetchCookieValue(env.Value, "pt_pin")
 								if env.PtPin == "" {
 									continue
 								}
