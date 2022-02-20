@@ -107,13 +107,15 @@ func initLogin() {
 					if err != nil && s.IsAdmin() {
 						return err
 					}
-					tabcount, _ = jsonparser.GetInt(data, "data", "tabcount")
-					if tabcount != 0 {
-						hasNolan = true
-					}
-					if !hasNolan == true {
-						// goto ADONG
-						return jd_cookie.GetString("tip1", "诺兰无法为您服务。--请稍后再试")
+					tabcount, e := jsonparser.GetInt(data, "data", "tabcount")
+					if e != nil {
+						if tabcount != 0 {
+							hasNolan = true
+						}
+						if !hasNolan == true {
+							// goto ADONG
+							return jd_cookie.GetString("tip1", "诺兰无法为您服务。--请稍后再试")
+						}
 					}
 				}
 				s.Reply(jd_cookie.GetString("nolan_first", "若兰为您服务，请输入11位手机号：(输入“q”随时退出会话。)"))
