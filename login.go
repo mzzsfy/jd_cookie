@@ -82,7 +82,6 @@ func initLogin() {
 					// logs.Info("跳过登录。")
 					return nil
 				}
-				var tabcount int64
 				addr := jd_cookie.GetString("nolan_addr")
 				addr = regexp.MustCompile(`https?://[\.\w]+:?\d*`).FindString(addr)
 				var haha func()
