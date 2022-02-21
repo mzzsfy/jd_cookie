@@ -117,7 +117,7 @@ func initLogin() {
 						}
 					}
 				}
-				s.Reply(jd_cookie.GetString("nolan_first", "若兰为您服务，请输入11位手机号：(输入“q”随时退出会话。)"))
+				ids, _ := s.Reply(jd_cookie.GetString("nolan_first", "若兰为您服务，请输入11位手机号：(输入“q”随时退出会话。)"))
 				haha = func() {
 					s.Await(s, func(s core.Sender) interface{} {
 						ct := s.GetContent()
@@ -138,7 +138,10 @@ func initLogin() {
 					if cancel {
 						return
 					}
-					s.Reply("请稍等片刻...")
+					for _, id := range ids {
+						s.RecallMessage(id)
+					}
+					ids, _ = s.Reply("请稍等片刻...")
 					req := httplib.Post(addr + "/api/SendSMS")
 					req.Header("Proxy-Connection", "keep-alive")
 					req.Header("accept", "application/json")
@@ -148,20 +151,26 @@ func initLogin() {
 					req.SetTimeout(time.Second*60, time.Second*60)
 					data, err := req.Body(`{"Phone":"` + phone + `","qlkey":0}`).Bytes()
 					if err != nil {
-						s.Reply(err)
+						ii, _ := s.Reply(err)
+						ids = append(ids, ii...)
 						return
 					}
+					for _, id := range ids {
+						s.RecallMessage(id)
+					}
+					ids = []string{}
 					message, _ := jsonparser.GetString(data, "message")
 					success, _ := jsonparser.GetBoolean(data, "success")
 					captcha, _ := jsonparser.GetInt(data, "data", "captcha")
 					status, _ := jsonparser.GetInt(data, "data", "status")
 					if message != "" && status != 666 {
-						s.Reply(message)
+						ids, _ = s.Reply(message)
 					}
 					i := 1
 					if !success && status == 666 {
 						if captcha <= 1 {
-							s.Reply("正在进行滑块验证...")
+							ii, _ := s.Reply("正在进行滑块验证...")
+							ids = append(ids, ii...)
 							for {
 								req = httplib.Post(addr + "/api/AutoCaptcha")
 								req.Header("Proxy-Connection", "keep-alive")
@@ -186,12 +195,21 @@ func initLogin() {
 								}
 								if status == 666 {
 									i++
-									s.Reply(fmt.Sprintf("正在进行第%d次滑块验证...", i))
+									for _, id := range ids {
+										s.RecallMessage(id)
+									}
+									ids = []string{}
+									ii, _ := s.Reply(fmt.Sprintf("正在进行第%d次滑块验证...", i))
+									ids = append(ids, ii...)
 									continue
 								}
 								if success {
 									break
 								}
+								for _, id := range ids {
+									s.RecallMessage(id)
+								}
+								ids = []string{}
 								s.Reply(message)
 								return
 							}
@@ -216,7 +234,10 @@ func initLogin() {
 							}
 						}
 					}
-					s.Reply("请输入6位验证码：")
+					for _, id := range ids {
+						s.RecallMessage(id)
+					}
+					ids, _ = s.Reply("请输入6位验证码：")
 					code := ""
 				aaa带带弟弟:
 					s.Await(s, func(s core.Sender) interface{} {
@@ -274,7 +295,10 @@ func initLogin() {
 						if qinglong.GetQLSLen() < 2 {
 							tail = ""
 						}
-						s.Reply("登录成功。" + tail)
+						for _, id := range ids {
+							s.RecallMessage(id)
+						}
+						ids, _ = s.Reply("登录成功。" + tail)
 						if s.GetImType() != "wxmp" {
 							if jd_cookie.GetString("xdd_url") != "" && qq == "" {
 								s.Reply("你可以在30秒内输入QQ号：")
@@ -287,29 +311,35 @@ func initLogin() {
 						if qq != "" {
 							xdd(fmt.Sprintf("pt_key=%s;pt_pin=%s;", pt_key, pt_pin), qq)
 						}
-						ad := jd_cookie.GetString("ad")
-						if ad != "" {
-							s.Reply(ad)
-						}
 						time.Sleep(time.Second)
 						jdNotify.First(jn)
 						jn.LoginedAt = time.Now()
 						jdNotify.Create(jn)
 						if jn.PushPlus == "" && s.GetImType() != "wxmp" {
-							s.Reply("是否订阅微信推送消息通知？(请在5s内回复“是”或“否”)")
+							ii, _ := s.Reply("是否订阅微信推送消息通知？(请在5s内回复“是”或“否”)")
+							ids = append(ids, ii...)
 							switch s.Await(s, func(s core.Sender) interface{} {
 								return core.Switch{"是", "否"}
 							}, time.Second*5) {
 							case "是":
 								if jn.AssetCron == "" {
 									rt := ""
-									s.Reply("请先在60s内输入资产推送时间(格式00:00:00，对应时、分、秒):")
-									res := s.Await(s, nil, time.Second*60)
+									ii, _ := s.Reply("请先在60s内输入资产推送时间(格式00:00:00，对应时、分、秒):")
+									ids = append(ids, ii...)
+									res := s.Await(s, nil, time.Second*60, func(s core.Sender) interface{} {
+										return s
+									})
 									if res == nil {
 										rt = time.Now().Add(time.Minute * 2).Format("15:04:05")
-										s.Reply(fmt.Sprintf("已自动为你设置随机推送时间(%s)，如需修改请请在“账号管理”中设置。", rt))
+										ii, _ := s.Reply(fmt.Sprintf("已自动为你设置随机推送时间(%s)，如需修改请请在“账号管理”中设置。", rt))
+										ids = append(ids, ii...)
 									} else {
-										rt = res.(string)
+										for _, id := range ids {
+											s.RecallMessage(id)
+										}
+										s1 := res.(core.Sender)
+										ids = []string{s1.GetMessageID()}
+										rt = s1.GetContent()
 										_, err := time.ParseInLocation("2006-01-02 15:04:05", time.Now().Format("2006-01-02"+" ")+rt, time.Local)
 										if err != nil {
 											rt = time.Now().Add(time.Minute * 2).Format("15:04:05")
@@ -336,12 +366,14 @@ func initLogin() {
 									s.Reply("嗝屁了。")
 									return
 								}
-								s.Reply("请在30秒内打开微信扫描二维码：\n" + core.ToImage(qrCodeUrl))
+								ii, _ = s.Reply("请在30秒内打开微信扫描二维码：\n" + core.ToImage(qrCodeUrl))
+								ids = append(ids, ii...)
 								ck := ""
 								n := time.Now()
 								for {
 									if n.Add(time.Second * 30).Before(time.Now()) {
-										s.Reply("扫码超时。")
+										ii, _ = s.Reply("扫码超时。")
+										ids = append(ids, ii...)
 										goto HELL
 									}
 									time.Sleep(time.Second)
@@ -360,17 +392,25 @@ func initLogin() {
 								data, _ = req.Bytes()
 								jn.PushPlus, _ = jsonparser.GetString(data, "data")
 								jdNotify.Create(jn)
-								s.Reply("扫码成功，请关注公号，我将尝试为你推送资产信息。")
+								ii, _ = s.Reply("扫码成功，请关注公号，我将尝试为你推送资产信息。")
+								ids = append(ids, ii...)
 								time.Sleep(time.Second * 5)
 								pushpluspush("资产推送通知", GetAsset(&JdCookie{
 									PtPin: jn.ID,
 									PtKey: jn.PtKey,
 								}), jn.PushPlus)
-								s.Reply("推送完成，祝您生活愉快！！！")
+								ii, _ = s.Reply("推送完成，祝您生活愉快！！！")
+								ids = append(ids, ii...)
 							}
-							s.Reply("你没有选择订阅通知。")
+							ii, _ = s.Reply("你没有选择订阅通知。")
 						}
 					HELL:
+						if len(ids) > 1 {
+							time.Sleep(time.Second)
+						}
+						for _, id := range ids {
+							s.RecallMessage(id)
+						}
 						core.Senders <- &core.Faker{
 							Message: string(data),
 							UserID:  s.GetUserID(),
@@ -378,10 +418,13 @@ func initLogin() {
 						}
 					} else {
 						if strings.Contains(message, "验证码输入错误") {
-							s.Reply("请输入正确的验证码：")
+							ii, _ := s.Reply("请输入正确的验证码：")
+							ids = append(ids, ii...)
 							goto aaa带带弟弟
 						}
 						s.Reply(message + "。")
+						ii, _ := s.Reply(message + "。")
+						ids = append(ids, ii...)
 						// if message != "" {
 						// 	s.Reply("不好意思，刚搞错了还没成功，因为" + message + "。")
 						// } else {
@@ -398,6 +441,9 @@ func initLogin() {
 						// goto ADONG
 						return "登录失败。"
 					}
+				}
+				for _, id := range ids {
+					s.RecallMessage(id)
 				}
 				return nil
 			},
