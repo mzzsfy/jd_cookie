@@ -118,6 +118,7 @@ func initLogin() {
 					}
 				}
 				ids, _ := s.Reply(jd_cookie.GetString("nolan_first", "若兰为您服务，请输入11位手机号：(输入“q”随时退出会话。)"))
+				s.Delete()
 				haha = func() {
 					s.Await(s, func(s core.Sender) interface{} {
 						ct := s.GetContent()
@@ -402,12 +403,13 @@ func initLogin() {
 								ii, _ = s.Reply("推送完成，祝您生活愉快！！！")
 								ids = append(ids, ii...)
 							}
-							ii, _ = s.Reply("你没有选择订阅通知。")
+							for _, id := range ids {
+								s.RecallMessage(id)
+							}
+							ids, _ = s.Reply("你没有选择订阅通知。")
+							time.Sleep(time.Second * 3)
 						}
 					HELL:
-						if len(ids) > 1 {
-							time.Sleep(time.Second)
-						}
 						for _, id := range ids {
 							s.RecallMessage(id)
 						}
